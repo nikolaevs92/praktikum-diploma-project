@@ -11,5 +11,6 @@ type GofemartInterface interface {
 }
 
 type AuthorizationInterface interface {
-	Regist(objects.RegisterMessage) error
+	Registration(objects.RegisterMessage) error
+	Login(objects.LoginMessage) (objects.TokenMessage, error)
 }

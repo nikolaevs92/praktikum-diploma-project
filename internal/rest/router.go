@@ -23,7 +23,7 @@ func MakeRouter(g GofemartInterface, a AuthorizationInterface) chi.Router {
 
 	r.Route("/api/user", func(r chi.Router) {
 		r.Post("/register", RegisterPostHandler(&a))
-		// r.Post("/login", LoginPostHandler(a))
+		r.Post("/login", LoginPostHandler(&a))
 		// r.Post("/orders", OrdersPostPostHandler(g, a))
 		// r.Get("/orders", RegisterGetHandler(g, a))
 		// r.Route("/balance", func(r chi.Router) {
@@ -65,7 +65,7 @@ func RegisterPostHandler(a *AuthorizationInterface) http.HandlerFunc {
 			return
 		}
 
-		err = (*a).Regist(message)
+		err = (*a).Registration(message)
 		if err != nil {
 			log.Println("error while registe: " + err.Error())
 			w.WriteHeader(http.StatusConflict)
@@ -77,7 +77,50 @@ func RegisterPostHandler(a *AuthorizationInterface) http.HandlerFunc {
 }
 
 func LoginPostHandler(a *AuthorizationInterface) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("got register request")
+		w.Header().Set("content-type", "application/json")
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Println("error while read body: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		message := objects.LoginMessage{}
+		if err := json.Unmarshal(body, &message); err != nil {
+			log.Println("error while unmarshal: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if message.Login == "" {
+			log.Println("empty login")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if message.Password == "" {
+			log.Println("empty password")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		token, err := (*a).Login(message)
+		if err != nil {
+			log.Println("error while login: " + err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		resp, err := json.Marshal(token)
+		if err != nil {
+			log.Println("error while marhal response: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	})
 }
 
 func OrdersPostPostHandler(g *GofemartInterface, a *AuthorizationInterface) http.HandlerFunc {
