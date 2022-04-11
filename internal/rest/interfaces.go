@@ -1,7 +1,15 @@
-package gofermart
+package rest
 
-import "context"
+import (
+	"context"
+
+	"github.com/nikolaevs92/praktikum-diploma-project.git/internal/objects"
+)
 
 type GofemartInterface interface {
-	Run(end context.Context)
+	Run(context.Context)
+}
+
+type AuthorizationInterface interface {
+	Regist(objects.RegisterMessage) error
 }

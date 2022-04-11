@@ -1,4 +1,4 @@
-package gofermart
+package rest
 
 import (
 	"context"
@@ -7,7 +7,8 @@ import (
 )
 
 type RestAPI struct {
-	Gofermart GofemartInterface
+	Gofermart     GofemartInterface
+	Authorization AuthorizationInterface
 	Config
 }
 
@@ -22,7 +23,7 @@ func New(cfg Config) *RestAPI {
 }
 
 func (g *RestAPI) RunHTTPServer(end context.Context) {
-	r := MakeRouter(&(g.Gofermart))
+	r := MakeRouter(g.Gofermart, g.Authorization)
 
 	server := &http.Server{
 		Addr:    g.Server,
