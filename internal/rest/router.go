@@ -132,14 +132,14 @@ func OrdersGetHandler(g *GofemartInterface) http.HandlerFunc {
 		log.Println("got post order request")
 		w.Header().Set("content-type", "application/json")
 
-		userId := r.Header.Get("User")
-		if userId == "" {
+		userID := r.Header.Get("User")
+		if userID == "" {
 			log.Println("no user Id, use Autification middleware")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		orders, err := (*g).GetOrders(userId)
+		orders, err := (*g).GetOrders(userID)
 		if err != nil {
 			log.Println("error while get orders: " + err.Error())
 			w.WriteHeader(http.StatusBadRequest)
@@ -169,8 +169,8 @@ func OrdersPostHandler(g *GofemartInterface) http.HandlerFunc {
 		log.Println("got get orders request")
 		w.Header().Set("content-type", "application/text")
 
-		userId := r.Header.Get("User")
-		if userId == "" {
+		userID := r.Header.Get("User")
+		if userID == "" {
 			log.Println("no user Id, use Autification middleware")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -190,7 +190,7 @@ func OrdersPostHandler(g *GofemartInterface) http.HandlerFunc {
 			return
 		}
 
-		err = (*g).PushOrder(userId, order)
+		err = (*g).PushOrder(userID, order)
 		if err != nil {
 			status, ok := err.(statuserror.StatusError)
 			if ok {
@@ -212,14 +212,14 @@ func BalanceGetHandler(g *GofemartInterface) http.HandlerFunc {
 		log.Println("got get balance request")
 		w.Header().Set("content-type", "application/json")
 
-		userId := r.Header.Get("User")
-		if userId == "" {
+		userID := r.Header.Get("User")
+		if userID == "" {
 			log.Println("no user Id, use Autification middleware")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		balance, err := (*g).GetBalance(userId)
+		balance, err := (*g).GetBalance(userID)
 		if err != nil {
 			log.Println("error while getting balance: " + err.Error())
 			w.WriteHeader(http.StatusUnauthorized)
@@ -242,8 +242,8 @@ func WithdrawGetHandler(g *GofemartInterface) http.HandlerFunc {
 		log.Println("got get balance request")
 		w.Header().Set("content-type", "application/json")
 
-		userId := r.Header.Get("User")
-		if userId == "" {
+		userID := r.Header.Get("User")
+		if userID == "" {
 			log.Println("no user Id, use Autification middleware")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -263,19 +263,15 @@ func WithdrawGetHandler(g *GofemartInterface) http.HandlerFunc {
 			return
 		}
 
-		err = (*g).Withdraw(userId, withdraw)
+		err = (*g).Withdraw(userID, withdraw)
 		if err != nil {
-			if err != nil {
-				status, ok := err.(statuserror.StatusError)
-				if ok {
-					w.WriteHeader(status.Status)
-				} else {
-					w.WriteHeader(http.StatusInternalServerError)
-				}
-				log.Println("error while push order: " + err.Error())
-				return
+			status, ok := err.(statuserror.StatusError)
+			if ok {
+				w.WriteHeader(status.Status)
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
 			}
-			log.Println("error while getting balance: " + err.Error())
+			log.Println("error while push order: " + err.Error())
 			return
 		}
 
@@ -289,14 +285,14 @@ func WithdrawalsGetHandler(g *GofemartInterface) http.HandlerFunc {
 		log.Println("got get withdrawals request")
 		w.Header().Set("content-type", "application/json")
 
-		userId := r.Header.Get("User")
-		if userId == "" {
+		userID := r.Header.Get("User")
+		if userID == "" {
 			log.Println("no user Id, use Autification middleware")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		withdrawals, err := (*g).GetWithdrawals(userId)
+		withdrawals, err := (*g).GetWithdrawals(userID)
 		if err != nil {
 			log.Println("error while getting balance: " + err.Error())
 			w.WriteHeader(http.StatusUnauthorized)

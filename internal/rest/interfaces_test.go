@@ -74,7 +74,7 @@ func (g GofemartTest) PushOrder(user string, order string) error {
 
 func (g GofemartTest) GetOrders(user string) ([]objects.Order, error) {
 	if user == "existed_user" {
-		return []objects.Order{{Number: "124", Status: objects.ORDER_STATUS_NEW, Accural: 111.0, UploudedAt: time.Now()}}, nil
+		return []objects.Order{{Number: "124", Status: objects.OrderStatusNew, Accural: 111.0, UploudedAt: time.Now()}}, nil
 	}
 	if user == "existed_user3" {
 		return []objects.Order{}, nil

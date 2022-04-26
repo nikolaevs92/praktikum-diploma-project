@@ -104,7 +104,7 @@ func TestGetOrdersHandler(t *testing.T) {
 
 		assert.Equal(t, len(orders), 1)
 		assert.Equal(t, orders[0].Accural, 111.0)
-		assert.Equal(t, orders[0].Status, objects.ORDER_STATUS_NEW)
+		assert.Equal(t, orders[0].Status, objects.OrderStatusNew)
 		assert.Equal(t, orders[0].Number, "124")
 	})
 
