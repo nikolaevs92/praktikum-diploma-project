@@ -35,12 +35,12 @@ func TestLoginHandler(t *testing.T) {
 					statusCode: 400,
 				},
 				{
-					urlPath:    "/api/user/register",
+					urlPath:    "/api/user/login",
 					input:      objects.LoginMessage{Login: "login"},
 					statusCode: 400,
 				},
 				{
-					urlPath:    "/api/user/register",
+					urlPath:    "/api/user/login",
 					input:      objects.LoginMessage{Password: "qwerty"},
 					statusCode: 400,
 				},

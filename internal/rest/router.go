@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 
 	"github.com/nikolaevs92/praktikum-diploma-project.git/internal/objects"
+	"github.com/nikolaevs92/praktikum-diploma-project.git/internal/statuserror"
 )
 
 func MakeRouter(g GofemartInterface, a AuthorizationInterface) chi.Router {
@@ -24,13 +25,16 @@ func MakeRouter(g GofemartInterface, a AuthorizationInterface) chi.Router {
 	r.Route("/api/user", func(r chi.Router) {
 		r.Post("/register", RegisterPostHandler(&a))
 		r.Post("/login", LoginPostHandler(&a))
-		// r.Post("/orders", OrdersPostPostHandler(g, a))
-		// r.Get("/orders", RegisterGetHandler(g, a))
-		// r.Route("/balance", func(r chi.Router) {
-		// 	r.Get("/", BalanceGetHandler(g, a))
-		// 	r.Post("/withdraw", WithdrawGetHandler(g, a))
-		// 	r.Get("/withdrawals", WithdrawalsGetHandler(g, a))
-		// })
+		r.Route("/", func(r chi.Router) {
+			r.Use(GetAutification(&a))
+			r.Post("/orders", OrdersPostHandler(&g))
+			r.Get("/orders", OrdersGetHandler(&g))
+			r.Route("/balance", func(r chi.Router) {
+				r.Get("/", BalanceGetHandler(&g))
+				r.Post("/withdraw", WithdrawGetHandler(&g))
+				r.Get("/withdrawals", WithdrawalsGetHandler(&g))
+			})
+		})
 	})
 
 	return r
@@ -123,22 +127,195 @@ func LoginPostHandler(a *AuthorizationInterface) http.HandlerFunc {
 	})
 }
 
-func OrdersPostPostHandler(g *GofemartInterface, a *AuthorizationInterface) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+func OrdersGetHandler(g *GofemartInterface) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("got post order request")
+		w.Header().Set("content-type", "application/json")
+
+		userId := r.Header.Get("User")
+		if userId == "" {
+			log.Println("no user Id, use Autification middleware")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		orders, err := (*g).GetOrders(userId)
+		if err != nil {
+			log.Println("error while get orders: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if len(orders) == 0 {
+			log.Println("dount have any orders")
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		resp, err := json.Marshal(orders)
+		if err != nil {
+			log.Println("error while marshal orders: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	})
 }
 
-func RegisterGetHandler(g *GofemartInterface, a *AuthorizationInterface) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+func OrdersPostHandler(g *GofemartInterface) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("got get orders request")
+		w.Header().Set("content-type", "application/text")
+
+		userId := r.Header.Get("User")
+		if userId == "" {
+			log.Println("no user Id, use Autification middleware")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Println("error while read body: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		order := string(body)
+		if order == "" {
+			log.Println("empty body")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		err = (*g).PushOrder(userId, order)
+		if err != nil {
+			status, ok := err.(statuserror.StatusError)
+			if ok {
+				w.WriteHeader(status.Status)
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			log.Println("error while push order: " + err.Error())
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(body)
+	})
 }
 
-func BalanceGetHandler(g *GofemartInterface, a *AuthorizationInterface) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+func BalanceGetHandler(g *GofemartInterface) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("got get balance request")
+		w.Header().Set("content-type", "application/json")
+
+		userId := r.Header.Get("User")
+		if userId == "" {
+			log.Println("no user Id, use Autification middleware")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		balance, err := (*g).GetBalance(userId)
+		if err != nil {
+			log.Println("error while getting balance: " + err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		resp, err := json.Marshal(balance)
+		if err != nil {
+			log.Println("error while marhal response: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	})
 }
 
-func WithdrawGetHandler(g *GofemartInterface, a *AuthorizationInterface) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+func WithdrawGetHandler(g *GofemartInterface) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("got get balance request")
+		w.Header().Set("content-type", "application/json")
+
+		userId := r.Header.Get("User")
+		if userId == "" {
+			log.Println("no user Id, use Autification middleware")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Println("error while read body: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		withdraw := objects.Withdraw{}
+		if err := json.Unmarshal(body, &withdraw); err != nil {
+			log.Println("error while unmarshal: " + err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		err = (*g).Withdraw(userId, withdraw)
+		if err != nil {
+			if err != nil {
+				status, ok := err.(statuserror.StatusError)
+				if ok {
+					w.WriteHeader(status.Status)
+				} else {
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+				log.Println("error while push order: " + err.Error())
+				return
+			}
+			log.Println("error while getting balance: " + err.Error())
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(body)
+	})
 }
 
-func WithdrawalsGetHandler(g *GofemartInterface, a *AuthorizationInterface) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+func WithdrawalsGetHandler(g *GofemartInterface) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("got get withdrawals request")
+		w.Header().Set("content-type", "application/json")
+
+		userId := r.Header.Get("User")
+		if userId == "" {
+			log.Println("no user Id, use Autification middleware")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		withdrawals, err := (*g).GetWithdrawals(userId)
+		if err != nil {
+			log.Println("error while getting balance: " + err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		if len(withdrawals) == 0 {
+			log.Println("dount have any withdrawls")
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		log.Println(withdrawals[0].Order, withdrawals[0].Sum)
+		resp, err := json.Marshal(withdrawals)
+		if err != nil {
+			log.Println("error while marhal response: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	})
 }
