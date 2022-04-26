@@ -13,6 +13,9 @@ import (
 type AuthorizationTest struct {
 }
 
+func (a AuthorizationTest) Run(ctx context.Context) {
+}
+
 func (a AuthorizationTest) Registration(message objects.RegisterMessage) error {
 	if message.Login == "exist_user" {
 		return errors.New("user already exist")
