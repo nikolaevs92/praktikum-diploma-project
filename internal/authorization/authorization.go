@@ -10,7 +10,7 @@ import (
 )
 
 type Authorization struct {
-	DB  AuthorizationDB
+	DB  AuthorizationDBInterface
 	Cfg Config
 
 	Tokens map[string]string

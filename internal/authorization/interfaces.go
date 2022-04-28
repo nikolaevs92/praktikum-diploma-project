@@ -2,7 +2,7 @@ package authorization
 
 import "context"
 
-type AuthorizationDB interface {
+type AuthorizationDBInterface interface {
 	IsLoginExist(string) bool
 	CheckLoginPasswordHash(string, string) (bool, string)
 	CreateUser(string, string) error
