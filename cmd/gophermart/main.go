@@ -18,7 +18,7 @@ import (
 
 func main() {
 	adress := pflag.StringP("adress", "a", "", "")
-	databaseUri := pflag.StringP("db-uri", "d", "", "")
+	databaseURI := pflag.StringP("db-uri", "d", "", "")
 	accuralSystemAdress := pflag.StringP("accural", "r", "", "")
 	pflag.Parse()
 
@@ -26,7 +26,7 @@ func main() {
 	v.AllowEmptyEnv(true)
 	v.AutomaticEnv()
 
-	cfg := config.NewConfigsWithDefaults(v, *adress, *databaseUri, *accuralSystemAdress)
+	cfg := config.NewConfigsWithDefaults(v, *adress, *databaseURI, *accuralSystemAdress)
 	cancelChan := make(chan os.Signal, 1)
 	signal.Notify(cancelChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	ctx, cancel := context.WithCancel(context.Background())

@@ -19,15 +19,15 @@ type Config struct {
 
 const (
 	envAdress              = "RUN_ADDRESS"
-	envDataBaseUri         = "DATABASE_URI"
+	envDataBaseURI         = "DATABASE_URI"
 	envAccuralSystemAdress = "ACCRUAL_SYSTEM_ADDRESS"
 )
 
 func NewConfigsWithDefaults(
-	v *viper.Viper, adress string, databaseUri string, accuralSystemAdress string) *Config {
+	v *viper.Viper, adress string, databaseURI string, accuralSystemAdress string) *Config {
 
 	v.SetDefault(envAdress, adress)
-	v.SetDefault(envDataBaseUri, databaseUri)
+	v.SetDefault(envDataBaseURI, databaseURI)
 	v.SetDefault(envAccuralSystemAdress, accuralSystemAdress)
 	return &Config{
 		Accural: accuralclient.Config{
@@ -36,7 +36,7 @@ func NewConfigsWithDefaults(
 			Timeout:     time.Second,
 		},
 		Rest:          rest.Config{Server: v.GetString(envAdress)},
-		DataBase:      database.Config{DataBaseDSN: v.GetString(envDataBaseUri)},
+		DataBase:      database.Config{DataBaseDSN: v.GetString(envDataBaseURI)},
 		Authorization: authorization.Config{},
 	}
 }
