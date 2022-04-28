@@ -1,3 +1,4 @@
 package gofermart
 
-type Config struct{}
+type Config struct {
+}
