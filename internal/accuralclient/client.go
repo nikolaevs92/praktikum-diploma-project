@@ -30,6 +30,7 @@ func (c *AccuralClient) GetOrder(order string) (objects.AccuralOrder, error) {
 	if err != nil {
 		return objects.AccuralOrder{}, errors.New("cant to get order from accural service")
 	}
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

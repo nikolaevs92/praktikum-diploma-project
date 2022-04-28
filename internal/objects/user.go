@@ -1,7 +1,7 @@
 package objects
 
 type User struct {
-	UserId       string
+	UserID       string
 	Login        string
 	PasswordHash string
 }

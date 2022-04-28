@@ -27,13 +27,13 @@ func (adb AuthorizationDBTest) IsLoginExist(login string) bool {
 func (adb AuthorizationDBTest) CheckLoginPasswordHash(login string, paswordHash string) (bool, string) {
 	for _, user := range adb.Users {
 		if user.Login == login && user.PasswordHash == paswordHash {
-			return true, user.UserId
+			return true, user.UserID
 		}
 	}
 	return false, ""
 }
 
 func (adb *AuthorizationDBTest) CreateUser(login string, paswordHash string) error {
-	adb.Users = append(adb.Users, objects.User{Login: login, PasswordHash: paswordHash, UserId: fmt.Sprintf("user%d", len(adb.Users))})
+	adb.Users = append(adb.Users, objects.User{Login: login, PasswordHash: paswordHash, UserID: fmt.Sprintf("user%d", len(adb.Users))})
 	return nil
 }
