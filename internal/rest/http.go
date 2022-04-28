@@ -27,10 +27,10 @@ func New(gofermart GofemartInterface, auth AuthorizationInterface, cfg Config) *
 func (g *RestAPI) RunHTTPServer(end context.Context) {
 	gofermartEndCtx, gofermartCancel := context.WithCancel(end)
 	defer gofermartCancel()
-	g.Gofermart.Run(gofermartEndCtx)
+	go g.Gofermart.Run(gofermartEndCtx)
 	authorizationEndCtx, authorizationCancel := context.WithCancel(end)
 	defer authorizationCancel()
-	g.Authorization.Run(authorizationEndCtx)
+	go g.Authorization.Run(authorizationEndCtx)
 	r := MakeRouter(g.Gofermart, g.Authorization)
 
 	server := &http.Server{
@@ -45,7 +45,7 @@ func (g *RestAPI) RunHTTPServer(end context.Context) {
 			panic(err)
 		}
 	}()
-
+	log.Println("Run server on: " + g.Server)
 	log.Fatal(server.ListenAndServe())
 }
 
