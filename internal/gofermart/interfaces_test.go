@@ -11,6 +11,10 @@ type AccuralInterfaceTest struct {
 	AccuralOrders []objects.AccuralOrder
 }
 
+func (a *AccuralInterfaceTest) Clean() {
+	a.AccuralOrders = make([]objects.AccuralOrder, 0)
+}
+
 func (a *AccuralInterfaceTest) AddOrder(accuralOrder objects.AccuralOrder) {
 	a.AccuralOrders = append(a.AccuralOrders, accuralOrder)
 }

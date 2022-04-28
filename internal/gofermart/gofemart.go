@@ -17,8 +17,20 @@ type Gofemart struct {
 	Cfg     Config
 }
 
+func New(gDB GofemartDBInterface, accural AccuralInterface, config Config) Gofemart {
+	return Gofemart{
+		DB:      gDB,
+		Accural: accural,
+		Cfg:     config,
+	}
+}
+
 func (g Gofemart) Run(end context.Context) {
-	g.DB.Run(end)
+	// Run Gofermart
+	BDEndCtx, BDCancel := context.WithCancel(end)
+	defer BDCancel()
+	go g.DB.Run(BDEndCtx)
+	<-end.Done()
 }
 
 func (g Gofemart) PushOrder(user string, orderID string) error {
@@ -92,6 +104,9 @@ func (g Gofemart) UpdateUserOrdersAndBalance(user string) error {
 	balance, err := g.DB.GetBalance(user)
 	if err != nil {
 		// No balance its ok, will insert it in the end
+		balance.Current = 0
+		balance.UserID = user
+		balance.Withdraw = 0
 		log.Println("error while get balance from db: " + err.Error())
 	}
 
@@ -109,6 +124,7 @@ func (g Gofemart) UpdateUserOrdersAndBalance(user string) error {
 	}
 
 	balance.Current += balanceChange
+	// because one transaction
 	err = g.DB.UpdateOrdersAndBalance(ordersRows, balance)
 	if err != nil {
 		log.Println("error while update orders and balance table: " + err.Error())

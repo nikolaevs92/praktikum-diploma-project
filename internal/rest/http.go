@@ -15,14 +15,22 @@ type RestAPI struct {
 func (g *RestAPI) Init() {
 }
 
-func New(cfg Config) *RestAPI {
+func New(gofermart GofemartInterface, auth AuthorizationInterface, cfg Config) *RestAPI {
 	server := new(RestAPI)
 	server.Config = cfg
+	server.Authorization = auth
+	server.Gofermart = gofermart
 	server.Init()
 	return server
 }
 
 func (g *RestAPI) RunHTTPServer(end context.Context) {
+	gofermartEndCtx, gofermartCancel := context.WithCancel(end)
+	defer gofermartCancel()
+	g.Gofermart.Run(gofermartEndCtx)
+	authorizationEndCtx, authorizationCancel := context.WithCancel(end)
+	defer authorizationCancel()
+	g.Authorization.Run(authorizationEndCtx)
 	r := MakeRouter(g.Gofermart, g.Authorization)
 
 	server := &http.Server{

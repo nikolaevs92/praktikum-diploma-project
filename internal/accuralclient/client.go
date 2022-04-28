@@ -16,6 +16,10 @@ type AccuralClient struct {
 	Cfg Config
 }
 
+func New(config Config) AccuralClient {
+	return AccuralClient{Cfg: config}
+}
+
 func (c *AccuralClient) GetWithRetrues(url string) (*http.Response, error) {
 	resp, err := http.Get(url)
 	for i := 0; i < c.Cfg.Retries && err != nil; i++ {

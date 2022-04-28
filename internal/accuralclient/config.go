@@ -8,3 +8,11 @@ type Config struct {
 	Retries int
 	Timeout time.Duration
 }
+
+func GetDefaultConfig() Config {
+	return Config{
+		AccuralHost: "localhost:4444",
+		Retries:     2,
+		Timeout:     time.Second,
+	}
+}

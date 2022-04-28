@@ -16,8 +16,12 @@ type Authorization struct {
 	Tokens map[string]string
 }
 
+func New(db AuthorizationDBInterface, config Config) Authorization {
+	return Authorization{DB: db, Cfg: config}
+}
+
 func (a Authorization) Run(ctx context.Context) {
-	a.DB.Run(ctx)
+	// a.DB.Run(ctx)
 }
 
 func (a Authorization) Registration(message objects.RegisterMessage) error {
