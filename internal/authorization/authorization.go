@@ -17,11 +17,10 @@ type Authorization struct {
 }
 
 func New(db AuthorizationDBInterface, config Config) Authorization {
-	return Authorization{DB: db, Cfg: config}
+	return Authorization{DB: db, Cfg: config, Tokens: map[string]string{}}
 }
 
 func (a Authorization) Run(ctx context.Context) {
-	a.Tokens = map[string]string{}
 	// a.DB.Run(ctx)
 }
 
