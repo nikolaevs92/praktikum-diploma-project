@@ -115,15 +115,11 @@ func LoginPostHandler(a *AuthorizationInterface) http.HandlerFunc {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		resp, err := json.Marshal(token)
-		if err != nil {
-			log.Println("error while marhal response: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
 
+		cookie := http.Cookie{Name: "auth-token", Value: token.Token}
+		http.SetCookie(w, &cookie)
 		w.WriteHeader(http.StatusOK)
-		w.Write(resp)
+		w.Write(body)
 	})
 }
 
