@@ -24,19 +24,21 @@ func (a Authorization) Run(ctx context.Context) {
 	// a.DB.Run(ctx)
 }
 
-func (a Authorization) Registration(message objects.RegisterMessage) error {
+func (a Authorization) Registration(message objects.RegisterMessage) (objects.TokenMessage, error) {
 	if message.Login == "" || message.Password == "" {
-		return errors.New("Login and password should be empty")
+		return objects.TokenMessage{}, errors.New("Login and password should be empty")
 	}
 
 	if a.DB.IsLoginExist(message.Login) {
-		return errors.New("user already exist")
+		return objects.TokenMessage{}, errors.New("user already exist")
 	}
 	err := a.DB.CreateUser(message.Login, getPasswordHash(message.Password))
 	if err == nil {
 		log.Printf("User with login: %s was succesfully created", message.Login)
 	}
-	return err
+	token := fmt.Sprintf("token%d", len(a.Tokens))
+	a.Tokens[token] = message.Login
+	return objects.TokenMessage{Token: token}, nil
 }
 
 func (a Authorization) Login(message objects.LoginMessage) (objects.TokenMessage, error) {
