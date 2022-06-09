@@ -39,17 +39,6 @@ func (g Gofemart) PushOrder(user string, orderID string) error {
 		return statuserror.NewStatusError("err", 400)
 	}
 
-	// get info from accural service
-	accuralOrder, err := g.Accural.GetOrder(orderID)
-	if err != nil {
-		log.Println("didnt get order from accural client: " + err.Error())
-		return statuserror.NewStatusError("err", 500)
-	}
-	if accuralOrder.Status == objects.OrderStatusInvalid {
-		log.Println("Invalid status of order: " + orderID)
-		return statuserror.NewStatusError("Invalid status of order: "+orderID, 422)
-	}
-
 	// check order in GofermartDB
 	orderRow, exist := g.DB.GetOrderIfExist(orderID)
 	if exist {
@@ -61,18 +50,14 @@ func (g Gofemart) PushOrder(user string, orderID string) error {
 		return statuserror.NewStatusError("another user already upload this order", 409)
 	}
 
-	// STUPID fix. Should update balance, but dount need it now, easely do it while getOrders or getBalance
-	if accuralOrder.Status == objects.OrderStatusProcessed {
-		accuralOrder.Status = objects.OrderStatusProcessing
-	}
-
 	// Start Procced new order
-	err = g.DB.InsertOrder(objects.OrderRow{UserID: user, Number: accuralOrder.Number, Status: accuralOrder.Status, Accural: accuralOrder.Accural, UploudedAt: time.Now()})
+	err := g.DB.InsertOrder(objects.OrderRow{UserID: user, UploudedAt: time.Now()})
 	if err != nil {
 		log.Println("Error while insert order: " + err.Error())
 		return statuserror.NewStatusError("Error while insert order", 500)
 	}
 	return statuserror.NewStatusError("", 202)
+
 }
 
 func (g Gofemart) GetOrders(user string) ([]objects.Order, error) {
@@ -117,6 +102,8 @@ func (g Gofemart) UpdateUserOrdersAndBalance(user string) error {
 		if err != nil {
 			continue
 		}
+		orderRow.Accural = accuralOrder.Accural
+		orderRow.Status = accuralOrder.Status
 		if orderRow.Status != accuralOrder.Status && accuralOrder.Status == objects.OrderStatusProcessed {
 			balanceChange += accuralOrder.Accural
 		}
