@@ -25,14 +25,21 @@ func TestAuthorization(t *testing.T) {
 	auth.Run(ctx)
 
 	t.Run("test_registration", func(t *testing.T) {
-		assert.Error(t, auth.Registration(objects.RegisterMessage{Login: "", Password: ""}))
-		assert.Error(t, auth.Registration(objects.RegisterMessage{Login: "", Password: "asdsd"}))
-		assert.Error(t, auth.Registration(objects.RegisterMessage{Login: "12d", Password: ""}))
+		_, err := auth.Registration(objects.RegisterMessage{Login: "", Password: ""})
+		assert.Error(t, err)
+		_, err = auth.Registration(objects.RegisterMessage{Login: "", Password: "asdsd"})
+		assert.Error(t, err)
+		_, err = auth.Registration(objects.RegisterMessage{Login: "12d", Password: ""})
+		assert.Error(t, err)
 
-		assert.NoError(t, auth.Registration(objects.RegisterMessage{Login: "login", Password: "password"}))
-		assert.Error(t, auth.Registration(objects.RegisterMessage{Login: "login", Password: "passwdsford"}))
-		assert.Error(t, auth.Registration(objects.RegisterMessage{Login: "login", Password: "password"}))
-		assert.NoError(t, auth.Registration(objects.RegisterMessage{Login: "login2", Password: "password"}))
+		_, err = auth.Registration(objects.RegisterMessage{Login: "login", Password: "password"})
+		assert.NoError(t, err)
+		_, err = auth.Registration(objects.RegisterMessage{Login: "login", Password: "passwdsford"})
+		assert.Error(t, err)
+		_, err = auth.Registration(objects.RegisterMessage{Login: "login", Password: "password"})
+		assert.Error(t, err)
+		_, err = auth.Registration(objects.RegisterMessage{Login: "login2", Password: "password"})
+		assert.NoError(t, err)
 	})
 
 	t.Run("test_login", func(t *testing.T) {

@@ -21,6 +21,7 @@ func New(db AuthorizationDBInterface, config Config) Authorization {
 }
 
 func (a Authorization) Run(ctx context.Context) {
+	a.Tokens = map[string]string{}
 	// a.DB.Run(ctx)
 }
 
