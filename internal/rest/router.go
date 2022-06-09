@@ -69,12 +69,14 @@ func RegisterPostHandler(a *AuthorizationInterface) http.HandlerFunc {
 			return
 		}
 
-		err = (*a).Registration(message)
+		token, err := (*a).Registration(message)
 		if err != nil {
 			log.Println("error while registe: " + err.Error())
 			w.WriteHeader(http.StatusConflict)
 			return
 		}
+		cookie := http.Cookie{Name: "auth-token", Value: token.Token}
+		http.SetCookie(w, &cookie)
 		w.WriteHeader(http.StatusOK)
 		w.Write(body)
 	})
