@@ -33,7 +33,7 @@ func (a Authorization) Registration(message objects.RegisterMessage) (objects.To
 		return objects.TokenMessage{}, errors.New("user already exist")
 	}
 	err := a.DB.CreateUser(message.Login, getPasswordHash(message.Password))
-	if err == nil {
+	if err != nil {
 		log.Printf("User with login: %s was succesfully created", message.Login)
 	}
 	token := fmt.Sprintf("token%d", len(a.Tokens))
