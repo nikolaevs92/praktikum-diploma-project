@@ -51,7 +51,7 @@ func (g Gofemart) PushOrder(user string, orderID string) error {
 	}
 
 	// Start Procced new order
-	err := g.DB.InsertOrder(objects.OrderRow{UserID: user, UploudedAt: time.Now()})
+	err := g.DB.InsertOrder(objects.OrderRow{UserID: user, Number: orderID, UploudedAt: time.Now()})
 	if err != nil {
 		log.Println("Error while insert order: " + err.Error())
 		return statuserror.NewStatusError("Error while insert order", 500)
