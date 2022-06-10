@@ -53,7 +53,7 @@ func (gdb *GofermartDB) GetOrders(user string) ([]objects.OrderRow, error) {
 		if err := rows.Scan(&orderRow.Number, &orderRow.UserID, &orderRow.Status, &orderRow.Accural, &ts); err != nil {
 			orderRow.UploudedAt = time.Unix(ts, 0)
 			log.Printf("Error %s while scan rows\n", err)
-			return []objects.OrderRow{}, fmt.Errorf("rrror %s while scan rows", err)
+			return orderRows, fmt.Errorf("rrror %s while scan rows", err)
 		}
 		orderRows = append(orderRows, orderRow)
 	}
