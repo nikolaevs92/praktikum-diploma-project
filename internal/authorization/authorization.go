@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/nikolaevs92/praktikum-diploma-project.git/internal/objects"
 )
@@ -14,17 +15,18 @@ type Authorization struct {
 	Cfg Config
 
 	Tokens map[string]string
+	mx     sync.RWMutex
 }
 
 func New(db AuthorizationDBInterface, config Config) Authorization {
 	return Authorization{DB: db, Cfg: config, Tokens: map[string]string{}}
 }
 
-func (a Authorization) Run(ctx context.Context) {
+func (a *Authorization) Run(ctx context.Context) {
 	// a.DB.Run(ctx)
 }
 
-func (a Authorization) Registration(message objects.RegisterMessage) (objects.TokenMessage, error) {
+func (a *Authorization) Registration(message objects.RegisterMessage) (objects.TokenMessage, error) {
 	if message.Login == "" || message.Password == "" {
 		return objects.TokenMessage{}, errors.New("Login and password should be empty")
 	}
@@ -37,23 +39,29 @@ func (a Authorization) Registration(message objects.RegisterMessage) (objects.To
 		log.Printf("User with login: %s was succesfully created", message.Login)
 	}
 	token := fmt.Sprintf("token%d", len(a.Tokens))
+	a.mx.Lock()
 	a.Tokens[token] = message.Login
+	a.mx.Unlock()
 	return objects.TokenMessage{Token: token}, nil
 }
 
-func (a Authorization) Login(message objects.LoginMessage) (objects.TokenMessage, error) {
+func (a *Authorization) Login(message objects.LoginMessage) (objects.TokenMessage, error) {
 	ok, userID := a.DB.CheckLoginPasswordHash(message.Login, getPasswordHash(message.Password))
 	if !ok {
 		return objects.TokenMessage{}, errors.New("wrong login or password")
 	}
 
 	token := fmt.Sprintf("token%d", len(a.Tokens))
+	a.mx.Lock()
 	a.Tokens[token] = userID
+	a.mx.Unlock()
 	return objects.TokenMessage{Token: token}, nil
 }
 
-func (a Authorization) GetUser(token string) (string, error) {
+func (a *Authorization) GetUser(token string) (string, error) {
+	a.mx.RLock()
 	userID, ok := a.Tokens[token]
+	a.mx.RUnlock()
 	if !ok {
 		return "", errors.New("wrong token")
 	}
