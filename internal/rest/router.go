@@ -127,7 +127,7 @@ func LoginPostHandler(a *AuthorizationInterface) http.HandlerFunc {
 
 func OrdersGetHandler(g *GofemartInterface) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("got post order request")
+		log.Println("got get order request")
 		w.Header().Set("content-type", "application/json")
 
 		userID := r.Header.Get("User")
@@ -164,7 +164,7 @@ func OrdersGetHandler(g *GofemartInterface) http.HandlerFunc {
 
 func OrdersPostHandler(g *GofemartInterface) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("got get orders request")
+		log.Println("got post orders request")
 		w.Header().Set("content-type", "application/text")
 
 		userID := r.Header.Get("User")
